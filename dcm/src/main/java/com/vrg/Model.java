@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import com.vrg.backend.ISolverBackend;
 import com.vrg.backend.MinizincSolver;
 import com.vrg.compiler.ModelCompiler;
+import com.vrg.backend.OrToolsSolver;
 import org.jooq.Constraint;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -70,7 +71,8 @@ public class Model {
         this.dbCtx = dbCtx;
         // for pretty-print query - useful for debugging
         this.dbCtx.settings().withRenderFormatted(true);
-        this.backend = new MinizincSolver(modelFile, dataFile, conf);
+//        this.backend = new MinizincSolver(modelFile, dataFile, conf);
+        this.backend = new OrToolsSolver();
         final List<CreateView> viewsInPolicy = views.stream().map(
                 view -> (CreateView) PARSER.createStatement(view, options)
         ).collect(Collectors.toList());
