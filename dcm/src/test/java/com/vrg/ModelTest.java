@@ -13,6 +13,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
+import org.jooq.SelectWhereStep;
 import org.jooq.impl.DSL;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -619,6 +620,13 @@ public class ModelTest {
         conn.execute("insert into HOSTS values ('h1', 1)");
         conn.execute("insert into HOSTS values ('h2', 2)");
         conn.execute("insert into HOSTS values ('h3', 3)");
+
+        final Result<Record> hosts = conn.selectFrom("HOSTS").fetch();
+
+        for (final Record r: hosts) {
+            System.out.println(hosts.get(0).get("HOST_ID"));
+        }
+        assert false;
 
         // Should not be opt
         final Model model = buildWeaveModel(conn, views, modelName);
