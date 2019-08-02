@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 class TupleGen {
-    private static final Map<Integer, TypeSpec> tuples = new ConcurrentHashMap<>();
+    private static final Map<Integer, TypeSpec> TUPLES = new ConcurrentHashMap<>();
 
     static Collection<TypeSpec> getAllTupleTypes() {
-        return tuples.values();
+        return TUPLES.values();
     }
 
     static TypeSpec getTupleType(final int numRecords) {
-        return tuples.computeIfAbsent(numRecords, TupleGen::tupleGen);
+        return TUPLES.computeIfAbsent(numRecords, TupleGen::tupleGen);
     }
 
     /**

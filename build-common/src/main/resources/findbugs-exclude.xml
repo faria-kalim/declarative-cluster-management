@@ -4,7 +4,15 @@
         <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE" />
     </Match>
     <Match>
-        <Class name="com.vrg.backend.RewriteArity$QualifiersList" />
+        <Class name="com.vrg.backend.GetVarQualifiers$QualifiersList" />
         <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
+    </Match>
+    <Match>
+        <Class name="com.vrg.backend.OrToolsSolver" />
+        <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME" />
+    </Match>
+    <Match>
+        <Class name="com.vrg.backend.OrToolsSolver$ExprToStrVisitor" />
+        <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE" />
     </Match>
 </FindBugsFilter>
