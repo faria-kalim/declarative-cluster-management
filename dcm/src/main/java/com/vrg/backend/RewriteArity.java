@@ -58,15 +58,15 @@ class RewriteArity {
         private MonoidComprehension rewriteComprehension(final MonoidComprehension input) {
             LOG.info("Attempting to rewrite: {}", input);
             // Extract var and non-var qualifiers
-            List<QualifiersList> collect = input.getQualifiers().stream()
+            List<GetVarQualifiers.QualifiersList> collect = input.getQualifiers().stream()
                                                 .map(q -> {
                                                     final GetVarQualifiers visitor = new GetVarQualifiers();
-                                                    return visitor.visit(q, new QualifiersList());
+                                                    return visitor.visit(q);
                                                 })
                                                 .collect(Collectors.toList());
-            final List<Qualifier> varQualifiers = collect.stream().flatMap(ql -> ql.varQualifiers.stream())
+            final List<Qualifier> varQualifiers = collect.stream().flatMap(ql -> ql.getVarQualifiers().stream())
                                                                   .collect(Collectors.toList());
-            final List<Qualifier> nonVarQualifiers = collect.stream().flatMap(ql -> ql.nonVarQualifiers.stream())
+            final List<Qualifier> nonVarQualifiers = collect.stream().flatMap(ql -> ql.getNonVarQualifiers().stream())
                                                                   .collect(Collectors.toList());
             if (varQualifiers.isEmpty()) {
                 return input;
@@ -94,126 +94,6 @@ class RewriteArity {
             }
         }
     }
-
-    /**
-     * Container to propagate var and non-var qualifiers
-     */
-    private static class QualifiersList {
-        private final List<Qualifier> varQualifiers;
-        private final List<Qualifier> nonVarQualifiers;
-
-        private QualifiersList() {
-            this.varQualifiers = new ArrayList<>();
-            this.nonVarQualifiers = new ArrayList<>();
-        }
-
-        private QualifiersList(final List<Qualifier> varQualifiers, final List<Qualifier> nonVarQualifiers) {
-            this.varQualifiers = new ArrayList<>(varQualifiers);
-            this.nonVarQualifiers = new ArrayList<>(nonVarQualifiers);
-        }
-
-        private QualifiersList withNonVarQualifier(final Qualifier qualifier) {
-            final List<Qualifier> newNonVarQualifiers = new ArrayList<>(nonVarQualifiers);
-            newNonVarQualifiers.add(qualifier);
-            return new QualifiersList(varQualifiers, newNonVarQualifiers);
-        }
-
-
-        private QualifiersList withVarQualifier(final Qualifier qualifier) {
-            final List<Qualifier> newVarQualifiers = new ArrayList<>(varQualifiers);
-            newVarQualifiers.add(qualifier);
-            return new QualifiersList(newVarQualifiers, nonVarQualifiers);
-        }
-
-        private QualifiersList withQualifiersList(final QualifiersList in) {
-            final List<Qualifier> newNonVarQualifiers = new ArrayList<>(this.nonVarQualifiers);
-            newNonVarQualifiers.addAll(in.nonVarQualifiers);
-            final List<Qualifier> newVarQualifiers = new ArrayList<>(this.varQualifiers);
-            newVarQualifiers.addAll(in.varQualifiers);
-            return new QualifiersList(newVarQualifiers, newNonVarQualifiers);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(Var: %s, NonVar: %s)", varQualifiers, nonVarQualifiers);
-        }
-    }
-
-    /**
-     * Separates qualifiers in an expression into vars and non-vars.
-     */
-    private static class GetVarQualifiers extends MonoidVisitor<QualifiersList, QualifiersList> {
-
-        @Override
-        protected QualifiersList visitGroupByQualifier(final GroupByQualifier node,
-                                                       @Nullable final QualifiersList context) {
-            assert context != null;
-            return context.withNonVarQualifier(node);
-        }
-
-        @Override
-        protected QualifiersList visitGroupByComprehension(final GroupByComprehension node,
-                                                           @Nullable final QualifiersList context) {
-            return context;
-        }
-
-        @Override
-        protected QualifiersList visitMonoidComprehension(final MonoidComprehension node,
-                                                          @Nullable final QualifiersList context) {
-            return context;
-        }
-
-        @Override
-        protected QualifiersList visitTableRowGenerator(final TableRowGenerator node,
-                                                        @Nullable final QualifiersList context) {
-            assert context != null;
-            return context.withNonVarQualifier(node);
-        }
-
-        @Override
-        protected QualifiersList visitMonoidFunction(final MonoidFunction node,
-                                                     @Nullable final QualifiersList context) {
-            return context;
-        }
-
-        @Override
-        protected QualifiersList visitBinaryOperatorPredicate(final BinaryOperatorPredicate node,
-                                                              final QualifiersList context) {
-            switch (node.getOperator()) {
-                case "==":
-                case "<":
-                case ">":
-                case "<=":
-                case ">=":
-                case "!=":
-                case "in":
-                case "\\/": {
-                    // function expressions do not necessarily affect the arity of an outer expression.
-                    // We err on the conservative side for now.
-                    if ((isControllableField(node.getLeft()) || isControllableField(node.getRight()))
-                         && (!(node.getLeft() instanceof MonoidFunction)
-                             && !(node.getRight() instanceof MonoidFunction))) {
-                        return context.withVarQualifier(node);
-                    }
-                    return context.withNonVarQualifier(node);
-                }
-                case "/\\": {
-                    final QualifiersList left = Objects.requireNonNull(visit(node.getLeft(), context));
-                    final QualifiersList right = Objects.requireNonNull(visit(node.getRight(), context));
-                    return left.withQualifiersList(right);
-                }
-                default:
-                    throw new RuntimeException("Missing case " + node.getOperator());
-            }
-        }
-
-        private boolean isControllableField(final Expr expr) {
-            final UsesControllableFields usesControllableFields = new UsesControllableFields();
-            usesControllableFields.visit(expr);
-            return usesControllableFields.usesControllableFields();
-        }
-    }
-
 
     /**
      * Rewrites sum/count functions such that the argument of the function is multiplied by a qualifier,
