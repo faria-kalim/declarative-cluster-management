@@ -26,6 +26,7 @@ import com.vrg.IRColumn;
 import com.vrg.IRContext;
 import com.vrg.IRTable;
 import com.vrg.Model;
+import com.vrg.ModelException;
 import com.vrg.compiler.monoid.BinaryOperatorPredicate;
 import com.vrg.compiler.monoid.BinaryOperatorPredicateWithAggregate;
 import com.vrg.compiler.monoid.ColumnIdentifier;
@@ -569,7 +570,7 @@ public class OrToolsSolver implements ISolverBackend {
         }
         builder.addStatement("return result");
         builder.endControlFlow();
-        builder.addStatement("throw new $T($S + status)", Model.WeaveModelException.class, "Could not solve ");
+        builder.addStatement("throw new $T($S + status)", ModelException.class, "Could not solve ");
     }
 
     private static String tableNameStr(final String tableName) {

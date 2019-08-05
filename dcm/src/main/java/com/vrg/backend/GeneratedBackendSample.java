@@ -16,6 +16,7 @@ import com.google.ortools.util.Domain;
 import com.vrg.IRContext;
 import com.vrg.IRTable;
 import com.vrg.Model;
+import com.vrg.ModelException;
 import org.jooq.Record;
 import org.jooq.Record2;
 import org.jooq.Record4;
@@ -120,7 +121,7 @@ public final class GeneratedBackendSample implements IGeneratedBackend {
                        context.getTable("GROUP_TABLE__PODS_DEMAND_PER_NODE").getCurrentData());
             return result;
         }
-        throw new Model.WeaveModelException("Could not solve " + status);
+        throw new ModelException("Could not solve " + status);
     }
 
 
