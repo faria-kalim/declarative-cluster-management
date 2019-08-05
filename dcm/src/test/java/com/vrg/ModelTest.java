@@ -1188,10 +1188,10 @@ public class ModelTest {
         conn.execute("insert into pod_info values ('p4', 'n2', 2, 2)");
 
         // build model
-        final WeaveModel weaveModel = buildWeaveModel(conn, views, modelName);
-        weaveModel.updateData();
+        final Model model = buildWeaveModel(conn, views, modelName);
+        model.updateData();
         final Map<String, Result<? extends Record>> podInfo =
-                weaveModel.solveModelWithoutTableUpdates(Collections.singleton("POD_INFO"));
+                model.solveModelWithoutTableUpdates(Collections.singleton("POD_INFO"));
         podInfo.get("POD_INFO").forEach(
                 e -> assertEquals("0", e.get("CONTROLLABLE__NODE_NAME"))
         );
