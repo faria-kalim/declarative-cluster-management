@@ -17,7 +17,6 @@ import com.google.ortools.sat.CpSolverStatus;
 import com.google.ortools.sat.IntVar;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -26,7 +25,7 @@ import com.squareup.javapoet.WildcardTypeName;
 import com.vrg.IRColumn;
 import com.vrg.IRContext;
 import com.vrg.IRTable;
-import com.vrg.WeaveModel;
+import com.vrg.Model;
 import com.vrg.compiler.monoid.BinaryOperatorPredicate;
 import com.vrg.compiler.monoid.BinaryOperatorPredicateWithAggregate;
 import com.vrg.compiler.monoid.ColumnIdentifier;
@@ -570,7 +569,7 @@ public class OrToolsSolver implements ISolverBackend {
         }
         builder.addStatement("return result");
         builder.endControlFlow();
-        builder.addStatement("throw new $T($S + status)", WeaveModel.WeaveModelException.class, "Could not solve ");
+        builder.addStatement("throw new $T($S + status)", Model.WeaveModelException.class, "Could not solve ");
     }
 
     private static String tableNameStr(final String tableName) {
