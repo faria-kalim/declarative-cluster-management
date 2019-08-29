@@ -12,10 +12,11 @@ import com.facebook.presto.sql.parser.SqlParser;
 import com.facebook.presto.sql.tree.CreateView;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.ortools.sat.LinearExpr;
 import com.vrg.backend.ISolverBackend;
 import com.vrg.backend.MinizincSolver;
-import com.vrg.compiler.ModelCompiler;
 import com.vrg.backend.OrToolsSolver;
+import com.vrg.compiler.ModelCompiler;
 import org.jooq.Constraint;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -92,8 +93,7 @@ public class Model {
             final String s = SqlFormatter.formatSql(view, Optional.empty());
             dbCtx.execute(s);
         });
-        final Set<String> createdViewNames = groupByViewsToCreate.stream().map(view -> view.getName()
-                                                                                           .toString()
+        final Set<String> createdViewNames = groupByViewsToCreate.stream().map(view -> view.getName().toString()
                                                                                      .toUpperCase(Locale.getDefault()))
                                                                           .collect(Collectors.toSet());
         final List<Table<?>> augmentedTableList = new ArrayList<>(tables);
