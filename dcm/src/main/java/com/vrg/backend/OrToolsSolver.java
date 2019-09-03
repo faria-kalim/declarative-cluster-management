@@ -75,6 +75,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 /**
  * This class generates Java code that invokes the or-tools CP-SAT solver. The generated
  * class is compiled, and loaded via ReflectASM to return an IGeneratedBackend instance,
@@ -103,7 +104,7 @@ public class OrToolsSolver implements ISolverBackend {
         System.loadLibrary("jniortools");
     }
 
-    @Nullable private IGeneratedBackend generatedBackend;// = new GeneratedBackendSample();
+    @Nullable private IGeneratedBackend generatedBackend; // = new GeneratedBackendSample();
     @Nullable private IRContext context = null;
 
     @Override
@@ -266,8 +267,8 @@ public class OrToolsSolver implements ISolverBackend {
         // For non-constraints, create a Map<> or a List<> to collect the result-set (depending on
         // whether the query is a group by or not)
         if (!isConstraint) {
-            addMapOrListForResultSet(builder, viewName, tupleSize, headItemsListTupleGenericParameters, resultSetNameStr,
-                    groupByQualifier);
+            addMapOrListForResultSet(builder, viewName, tupleSize, headItemsListTupleGenericParameters,
+                                     resultSetNameStr, groupByQualifier);
         }
 
         // Separate out qualifiers into variable and non-variable types.
