@@ -11,6 +11,7 @@ import com.vrg.IRColumn;
 import com.vrg.compiler.monoid.BinaryOperatorPredicate;
 import com.vrg.compiler.monoid.ColumnIdentifier;
 import com.vrg.compiler.monoid.Expr;
+import com.vrg.compiler.monoid.MonoidComprehension;
 import com.vrg.compiler.monoid.MonoidFunction;
 import com.vrg.compiler.monoid.MonoidLiteral;
 import com.vrg.compiler.monoid.MonoidVisitor;
@@ -48,6 +49,12 @@ class InferType extends MonoidVisitor<String, Void> {
             default:
                 throw new UnsupportedOperationException();
         }
+    }
+
+    @Nullable
+    @Override
+    protected String visitMonoidComprehension(MonoidComprehension node, @Nullable Void context) {
+        return "SubQuery";
     }
 
     @Nullable
