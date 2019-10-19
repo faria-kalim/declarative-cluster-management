@@ -63,7 +63,7 @@ public class DBBenchmark {
                 .measurementIterations(5)
                 .mode(Mode.AverageTime)
                 .shouldDoGC(true)
-                .result("profiling-result-after-refactoring.csv").resultFormat(ResultFormatType.CSV)
+                .result("profiling-result-after-refactoring-with-new-API.csv").resultFormat(ResultFormatType.CSV)
                 .forks(1)
                 .build();
 
@@ -88,7 +88,6 @@ public class DBBenchmark {
             baseTables = new ArrayList<>();
             baseTables.add("POD");
             baseTables.add("NODE");
-
             updater = new H2Updater("test", connection, dbCtx, model.getIRTables(), baseTables);
 
         } catch (final SQLException e) {

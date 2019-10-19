@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ViewUpdater can be used to help update views held in the DB incrementally, using DDLog. The class receives triggers
@@ -32,8 +31,8 @@ public abstract class ViewUpdater {
     private final List<String> baseTables;
     private final DSLContext dbCtx;
     private final Map<String, Map<String, PreparedStatement>> preparedQueries = new HashMap<>();
+    private Map<String, IRTable> irTables;
     private final DDlogUpdater updater;
-    private final Map<String, IRTable> irTables;
     private final Map<String, List<LocalDDlogCommand>> recordsFromDDLog = new HashMap<>();
 
     private static final String INTEGER_TYPE = "java.lang.Integer";
@@ -41,7 +40,7 @@ public abstract class ViewUpdater {
     private static final String BOOLEAN_TYPE = "java.lang.Boolean";
     private static final String LONG_TYPE = "java.lang.Long";
 
-    static Map<String, List<LocalDDlogCommand>> mapRecordsFromDB = new ConcurrentHashMap<>();
+    static final Map<String, List<Object[]>> RECORDS_FROM_DB_2 = new HashMap<>();
 
     /**
      * @param modelName: the name of the model this object is associated with
@@ -54,8 +53,6 @@ public abstract class ViewUpdater {
     public ViewUpdater(final String modelName, final Connection connection, final DSLContext dbCtx,
                        final List<String> baseTables, final Map<String, IRTable> irTables) {
         this.modelName = modelName.toUpperCase(Locale.US);
-        mapRecordsFromDB.computeIfAbsent(this.modelName, m -> new ArrayList<LocalDDlogCommand>());
-
         this.connection = connection;
         this.irTables = irTables;
         this.baseTables = baseTables;
@@ -107,6 +104,7 @@ public abstract class ViewUpdater {
     private void receiveUpdateFromDDlog(final DDlogCommand command) {
         final List objects = new ArrayList();
         final DDlogRecord record = command.value;
+        System.out.println("Print command: " + command);
 
         final String tableName = command.value.getStructName();
         // we only hold records for tables we have in the DB and none others.
@@ -142,7 +140,7 @@ public abstract class ViewUpdater {
     }
 
     public void flushUpdates() {
-        updater.sendUpdatesToDDlog(mapRecordsFromDB.get(modelName));
+        updater.sendUpdatesToDDlog(RECORDS_FROM_DB_2);
 
         for (final Map.Entry<String, List<LocalDDlogCommand>> entry: recordsFromDDLog.entrySet()) {
             final String tableName = entry.getKey();
@@ -158,7 +156,6 @@ public abstract class ViewUpdater {
                 }
         }
         recordsFromDDLog.clear();
-        mapRecordsFromDB.get(modelName).clear();
     }
 
      private void flush(final String tableName, final LocalDDlogCommand command) {
@@ -186,7 +183,6 @@ public abstract class ViewUpdater {
                         query.setString(index, (String) item);
                 }
             }
-
             query.executeUpdate();
         } catch (final SQLException e) {
             throw new RuntimeException(e);
@@ -214,6 +210,5 @@ public abstract class ViewUpdater {
         } catch (final SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 }

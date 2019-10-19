@@ -1,6 +1,5 @@
 package org.dcm;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.dcm.viewupdater.H2Updater;
 import org.dcm.viewupdater.ViewUpdater;
 import org.jooq.DSLContext;
@@ -209,9 +208,7 @@ public class DDlogTest {
         final List<String> baseTables = new ArrayList<>();
         baseTables.add("POD");
         baseTables.add("NODE");
-
         final Model model = buildModel(dbCtx, new ArrayList<>(), modelName);
-
         final ViewUpdater updater = new H2Updater(modelName, conn, dbCtx, model.getIRTables(), baseTables);
 
         try {
@@ -221,8 +218,8 @@ public class DDlogTest {
             final PreparedStatement podStmt = conn.prepareStatement(
                     "insert into pod values(?, 'scheduled', ?, 'default', 1, 1, 1, 1, 'owner', 'owner', 1)");
 
-            for (int j = 0; j < 50; j++) {
-                final int numRecords = 10;
+            for (int j = 0; j < 500; j++) {
+                final int numRecords = 100;
                 int index = j * numRecords;
                 final int iEnd = index + numRecords;
                 for (; index < iEnd; index++) {
@@ -253,7 +250,6 @@ public class DDlogTest {
      * @param testName Name of the test case. Model and data files will be based on that name
      * @return built Model
      */
-    @CanIgnoreReturnValue
     private Model buildModel(final DSLContext dbCtx, final List<String> views, final String testName) {
         final File modelFile = new File("src/test/resources/" + testName + ".mzn");
         // create data file

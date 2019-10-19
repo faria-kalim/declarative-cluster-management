@@ -8,6 +8,7 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -24,6 +25,9 @@ public class DDlogUpdater {
     static final String BOOLEAN_TYPE = "java.lang.Boolean";
     static final String LONG_TYPE = "java.lang.Long";
 
+    private ddlog.weave_fewer_queries_cap.weave_fewer_queries_capUpdateBuilder builder
+            = new ddlog.weave_fewer_queries_cap.weave_fewer_queries_capUpdateBuilder();
+
     public DDlogUpdater(final Consumer<DDlogCommand> consumer, final Map<String, IRTable> irTables) {
         API = new DDlogAPI(1, consumer, false);
         API.record_commands("replay.dat", false);
@@ -31,7 +35,7 @@ public class DDlogUpdater {
         this.irTables = irTables;
     }
 
-    private DDlogRecord toDDlogRecord(final String tableName, final List<Object> args) {
+    public DDlogRecord toDDlogRecord(final String tableName, final List<Object> args) {
         final List<DDlogRecord> records = new ArrayList<>();
         final IRTable irTable = irTables.get(tableName);
         final Table<? extends Record> table = irTable.getTable();
@@ -69,15 +73,18 @@ public class DDlogUpdater {
         return new DDlogCommand(DDlogCommand.Kind.Insert, id, toDDlogRecord(record.tableName, record.values));
     }
 
-    public void sendUpdatesToDDlog(final List<LocalDDlogCommand> records) {
-        final List<DDlogCommand> commands = new ArrayList<>();
-        for (final LocalDDlogCommand record: records) {
-            commands.add(recordToCommand(record));
+    public void sendUpdatesToDDlog(final Map<String, List<Object[]>> recordsFromDB2) {
+        for (final Map.Entry<String, List<Object[]>> entry: recordsFromDB2.entrySet()) {
+            final String tableName = entry.getKey();
+            for (final Object[] row: entry.getValue()) {
+                update(tableName, row);
+            }
+            recordsFromDB2.get(tableName).clear();
         }
-        final DDlogCommand [] ca = commands.toArray(new DDlogCommand[commands.size()]);
         checkDDlogExitCode(API.start());
-        checkDDlogExitCode(API.applyUpdates(ca));
+        checkDDlogExitCode(builder.applyUpdates(API));
         checkDDlogExitCode(API.commit());
+        builder = new ddlog.weave_fewer_queries_cap.weave_fewer_queries_capUpdateBuilder();
     }
 
     private void checkDDlogExitCode(final int exitCode) {
@@ -88,5 +95,46 @@ public class DDlogUpdater {
 
     public void close() {
         API.stop();
+    }
+
+    public void update(final String tableName, final Object[] newRow) {
+        switch (tableName) {
+            case "POD":
+                builder.insert_POD(newRow[0].toString(),
+                        newRow[1].toString(),
+                        newRow[2].toString(),
+                        newRow[3].toString(),
+                        new BigInteger(String.valueOf((long) newRow[4])),
+                        new BigInteger(String.valueOf((long) newRow[5])),
+                        new BigInteger(String.valueOf((long) newRow[6])),
+                        new BigInteger(String.valueOf((long) newRow[7])),
+                        newRow[8].toString(),
+                        newRow[9].toString(),
+                        new BigInteger(String.valueOf((int) newRow[10]))
+                );
+                break;
+            case "NODE":
+                builder.insert_NODE(newRow[0].toString(),
+                        (boolean) newRow[1],
+                        (boolean) newRow[2],
+                        (boolean) newRow[3],
+                        (boolean) newRow[4],
+                        (boolean) newRow[5],
+                        (boolean) newRow[6],
+                        (boolean) newRow[7],
+                        (boolean) newRow[8],
+                        new BigInteger(String.valueOf((long) newRow[9])),
+                        new BigInteger(String.valueOf((long) newRow[10])),
+                        new BigInteger(String.valueOf((long) newRow[11])),
+                        new BigInteger(String.valueOf((long) newRow[12])),
+                        new BigInteger(String.valueOf((long) newRow[13])),
+                        new BigInteger(String.valueOf((long) newRow[14])),
+                        new BigInteger(String.valueOf((long) newRow[15])),
+                        new BigInteger(String.valueOf((long) newRow[16]))
+                        );
+                break;
+            default:
+                break;
+        }
     }
 }

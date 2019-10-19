@@ -31,7 +31,6 @@ public class LocalDDlogCommand {
 
     public static LocalDDlogCommand newLocalDDlogCommand(final String tableName, final Object[] args) {
         final List<Object> records = new ArrayList<>();
-        // first item is the tableName
         for (final Object obj: args) {
             records.add(obj);
         }

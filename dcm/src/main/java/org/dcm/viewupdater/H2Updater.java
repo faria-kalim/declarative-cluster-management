@@ -40,8 +40,9 @@ public class H2Updater extends ViewUpdater {
         @Override
         public void fire(final Connection connection, final Object[] oldRow,
                          final Object[] newRow) throws SQLException {
-            mapRecordsFromDB.computeIfAbsent(modelName, m -> new ArrayList<>());
-            mapRecordsFromDB.get(modelName).add(LocalDDlogCommand.newLocalDDlogCommand(tableName, newRow));
+            //TODO: Note that this is not separated by model
+            RECORDS_FROM_DB_2.computeIfAbsent(tableName, m -> new ArrayList<>());
+            RECORDS_FROM_DB_2.get(tableName).add(newRow);
         }
 
         @Override
