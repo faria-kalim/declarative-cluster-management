@@ -23,3 +23,5 @@ javac ddlog/weave_fewer_queries_cap/*.java
 jar -cf weave-apps.jar ddlog/*
 
 mvn install:install-file -Dfile=weave-apps.jar -DgroupId=ddlog.weave_fewer_queries_cap -DartifactId="ddlog.weave_fewer_queries_cap" -Dversion=0.1 -Dpackaging=jar
+
+mvn install:install-file -Dfile=/Users/fariakalim/Documents/DCM/ddlog/java/ddlogapi.jar -DgroupId=ddlogapi -DartifactId=ddlog -Dversion=1.0 -Dpackaging=jar
