@@ -1,7 +1,5 @@
 package org.dcm.viewupdater;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import org.dcm.IRTable;
 import org.h2.api.Trigger;
 import org.jooq.DSLContext;
@@ -24,7 +22,6 @@ public class H2Updater extends ViewUpdater {
 
     public static class InnerH2Updater implements Trigger {
         private String tableName;
-        private String modelName;
 
         public InnerH2Updater() {
 
@@ -34,7 +31,6 @@ public class H2Updater extends ViewUpdater {
         public void init(final Connection connection, final String schemaName, final String triggerName,
                          final String tableName, final boolean before, final int type) throws SQLException {
             this.tableName = tableName;
-            this.modelName = Iterables.get(Splitter.on('_').split(triggerName), 0);
         }
 
         @Override
