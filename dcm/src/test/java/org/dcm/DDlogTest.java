@@ -218,8 +218,8 @@ public class DDlogTest {
             final PreparedStatement podStmt = conn.prepareStatement(
                     "insert into pod values(?, 'scheduled', ?, 'default', 1, 1, 1, 1, 'owner', 'owner', 1)");
 
-            for (int j = 0; j < 500; j++) {
-                final int numRecords = 100;
+            for (int j = 0; j < 1; j++) {
+                final int numRecords = 100000;
                 int index = j * numRecords;
                 final int iEnd = index + numRecords;
                 for (; index < iEnd; index++) {
