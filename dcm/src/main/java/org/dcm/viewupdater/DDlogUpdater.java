@@ -11,13 +11,11 @@ import org.jooq.Table;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class DDlogUpdater {
     private final DDlogAPI API;
-    private final Map<String, Integer> tableIDMap;
     private final Map<String, IRTable> irTables;
 
     static final String INTEGER_TYPE = "java.lang.Integer";
@@ -31,7 +29,6 @@ public class DDlogUpdater {
     public DDlogUpdater(final Consumer<DDlogCommand> consumer, final Map<String, IRTable> irTables) {
         API = new DDlogAPI(1, consumer, false);
         API.record_commands("replay.dat", false);
-        tableIDMap = new HashMap<>();
         this.irTables = irTables;
     }
 
@@ -64,13 +61,6 @@ public class DDlogUpdater {
         DDlogRecord[] recordsArray = new DDlogRecord[records.size()];
         recordsArray = records.toArray(recordsArray);
         return DDlogRecord.makeStruct(tableName, recordsArray);
-    }
-
-    private DDlogCommand recordToCommand(final LocalDDlogCommand record) {
-        tableIDMap.computeIfAbsent(record.tableName, r -> API.getTableId(record.tableName));
-        final int id = tableIDMap.get(record.tableName);
-        checkDDlogExitCode(id);
-        return new DDlogCommand(DDlogCommand.Kind.Insert, id, toDDlogRecord(record.tableName, record.values));
     }
 
     public void sendUpdatesToDDlog(final Map<String, List<Object[]>> recordsFromDB2) {

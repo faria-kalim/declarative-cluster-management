@@ -21,7 +21,6 @@ public class HSQLUpdater extends ViewUpdater {
     }
 
     public static class InnerHSQLUpdater implements Trigger {
-        private String modelName;
 
         public InnerHSQLUpdater() {
 
