@@ -6,10 +6,10 @@ export JDK_OS=darwin
 export JAVA_HOME=~/.jenv/versions/12.0
 export DDLOG=~/Documents/DCM/ddlog
 
-cd ~/Documents/DCM/differential-datalog/test/datalog_tests
+cd ~/Documents/DCM/differential-datalog
 
-ddlog -i weave_fewer_queries_cap.dl -L lib -j
-cd weave_fewer_queries_cap_ddlog
+ddlog -i test/datalog_tests/weave_fewer_queries_cap.dl -L lib -j
+cd test/datalog_tests/weave_fewer_queries_cap_ddlog
 cargo build --features=flatbuf --release
 
 cc -shared -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/${JDK_OS} -I. -I${DDLOG}/lib ${DDLOG}/java/ddlogapi.c -Ltarget/release/ -lweave_fewer_queries_cap_ddlog -o libddlogapi.dylib
