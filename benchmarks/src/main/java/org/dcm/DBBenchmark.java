@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-2
  */
+
 package org.dcm;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -56,14 +57,15 @@ public class DBBenchmark {
 
     private int index = 0;
 
-    public static void main(String[] args) throws IOException, RunnerException {
-        Options opts = new OptionsBuilder()
+    public static void main(final String[] args) throws IOException, RunnerException {
+        final Options opts = new OptionsBuilder()
                 .include(".*")
                 .warmupIterations(2)
                 .measurementIterations(5)
                 .mode(Mode.AverageTime)
                 .shouldDoGC(true)
-                .result("profiling-result-after-refactoring-with-new-API.csv").resultFormat(ResultFormatType.CSV)
+                .result("profiling-result-after-" +
+                        "refactoring-with-new-API.csv").resultFormat(ResultFormatType.CSV)
                 .forks(1)
                 .build();
 
@@ -213,8 +215,8 @@ public class DBBenchmark {
                 nodeStmt.executeUpdate();
                 podStmt.executeUpdate();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (final SQLException e) {
+            throw new RuntimeException(e);
         }
         updater.flushUpdates();
     }
@@ -233,7 +235,7 @@ public class DBBenchmark {
                 nodeStmt.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         updater.flushUpdates();
     }
@@ -241,7 +243,7 @@ public class DBBenchmark {
     @CanIgnoreReturnValue
     private Model buildModel(final DSLContext dslCtx, final List<String> views, final String testName) {
         // get model file for the current test
-        final File modelFile = new File("src/test/resources/" + testName + ".mzn");
+        final File modelFile = new File("resources/" + testName + ".mzn");
         // create data file
         final File dataFile = new File("/tmp/" + testName + ".dzn");
         return Model.buildModel(dslCtx, views, modelFile, dataFile);
