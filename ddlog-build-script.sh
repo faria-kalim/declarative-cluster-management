@@ -33,5 +33,6 @@ mvn install:install-file -Dfile=${DDLOG}/java/ddlogapi.jar -DgroupId=ddlogapi -D
 cd $cwd
 mvn -DargLine="-Djava.library.path=${DDLOG}/${DPROG}_ddlog" clean package
 cd benchmarks/target
+mkdir resources
 java -cp benchmarks.jar -Djava.library.path="${DDLOG}/${DPROG}_ddlog" org.dcm.DBBenchmark
 
