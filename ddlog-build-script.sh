@@ -1,12 +1,14 @@
 #!/bin/bash
 
 set -ex
+cwd=$(pwd)
 
 export JDK_OS=darwin
 export JAVA_HOME=~/.jenv/versions/12.0
 export DDLOG=~/Documents/DCM/ddlog
 export DPROG=weave_fewer_queries_cap
 export FLATBUFFERS_JAR_PATH=~/Documents/DCM/flatbuffers-java-1.11.0.jar
+
 
 cp ${DPROG}.dl ${DDLOG}
 cd ${DDLOG}
@@ -28,7 +30,8 @@ jar -cf weave-apps.jar ddlog/*
 mvn install:install-file -Dfile=weave-apps.jar -DgroupId=ddlog.${DPROG} -DartifactId=ddlog.${DPROG} -Dversion=0.1 -Dpackaging=jar
 mvn install:install-file -Dfile=${DDLOG}/java/ddlogapi.jar -DgroupId=ddlogapi -DartifactId=ddlog -Dversion=1.0 -Dpackaging=jar
 
+cd $cwd
 mvn -DargLine="-Djava.library.path=${DLOG}/${DPROG}_ddlog" clean package
 cd benchmarks/target
-java -cp benchmarks.jar  -Djava.library.path="$DLOG{}/${DPROG}_ddlog" org.dcm.DBBenchmark
+java -cp benchmarks.jar  -Djava.library.path="${DLOG}/${DPROG}_ddlog" org.dcm.DBBenchmark
 
