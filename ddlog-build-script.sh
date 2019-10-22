@@ -31,7 +31,7 @@ mvn install:install-file -Dfile=weave-apps.jar -DgroupId=ddlog.${DPROG} -Dartifa
 mvn install:install-file -Dfile=${DDLOG}/java/ddlogapi.jar -DgroupId=ddlogapi -DartifactId=ddlog -Dversion=1.0 -Dpackaging=jar
 
 cd $cwd
-mvn -DargLine="-Djava.library.path=${DLOG}/${DPROG}_ddlog" clean package
+mvn -DargLine="-Djava.library.path=${DDLOG}/${DPROG}_ddlog" clean package
 cd benchmarks/target
-java -cp benchmarks.jar  -Djava.library.path="${DLOG}/${DPROG}_ddlog" org.dcm.DBBenchmark
+java -cp benchmarks.jar -Djava.library.path="${DDLOG}/${DPROG}_ddlog" org.dcm.DBBenchmark
 

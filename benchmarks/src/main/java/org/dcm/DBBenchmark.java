@@ -174,8 +174,8 @@ public class DBBenchmark {
     }
 
     @Setup(Level.Invocation)
-    public void setupDB(){
-        switch(db) {
+    public void setupDB() {
+        switch (db) {
             case "H2":
                 setupH2();
                 break;
@@ -234,7 +234,7 @@ public class DBBenchmark {
                 nodeStmt.setString(1, "node" + i);
                 nodeStmt.executeUpdate();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new RuntimeException(e);
         }
         updater.flushUpdates();
