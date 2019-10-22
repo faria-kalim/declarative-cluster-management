@@ -9,10 +9,9 @@ export DDLOG=~/Documents/DCM/ddlog
 export DPROG=weave_fewer_queries_cap
 export FLATBUFFERS_JAR_PATH=~/Documents/DCM/flatbuffers-java-1.11.0.jar
 
-
 cp ${DPROG}.dl ${DDLOG}
 cd ${DDLOG}
-ddlog -i ${DPROG}.dl -L lib -j
+bin/ddlog -i ${DPROG}.dl -L lib -j
 cp Cargo.lock ${DPROG}_ddlog/
 cd ${DPROG}_ddlog
 cargo build --features=flatbuf --release
