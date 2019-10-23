@@ -1,6 +1,6 @@
-function sum(g: Group<(bigint)>): (bigint) =
+function sum(g: Group<(signed<64>)>): (signed<64>) =
 {
-    var sum: bigint = 0;
+    var sum: signed<64> = 0;
     for (resource in g) {
         sum = resource + sum
     };
@@ -17,36 +17,36 @@ input relation NODE(
 	pid_pressure: bool, 
 	ready: bool, 
 	network_unavailable: bool, 
-	cpu_capacity: bigint, 
-	memory_capacity: bigint,
-	ephemeral_storage_capacity: bigint, 
-	pods_capacity: bigint, 
-	cpu_allocatable:bigint, 
-	memory_allocatable: bigint, 
-	ephemeral_storage_allocatable:bigint, 
-	pods_allocatable: bigint) 
+	cpu_capacity: signed<64>, 
+	memory_capacity: signed<64>,
+	ephemeral_storage_capacity: signed<64>, 
+	pods_capacity: signed<64>, 
+	cpu_allocatable: signed<64>, 
+	memory_allocatable: signed<64>, 
+	ephemeral_storage_allocatable: signed<64>, 
+	pods_allocatable: signed<64>) 
 
 input relation POD(
 	pod_name: string, 
 	status: string, 
 	controllable__node_name: string,
 	namespace: string, 
-	cpu_request: bigint,  
-	memory_request: bigint, 
-	ephemeral_storage_request: bigint,
-	pods_request:bigint,
+	cpu_request: signed<64>,  
+	memory_request: signed<64>, 
+	ephemeral_storage_request: signed<64>,
+	pods_request: signed<64>,
 	owner_name: string,
 	creation_timestamp: string,
-	priority: bigint)
+	priority: signed<64>)
 
 
-output relation CPUUSEDPERNODE(name: string, cpu: bigint)
+output relation CPUUSEDPERNODE(name: string, cpu: signed<64>)
 
-output relation MEMORYUSEDPERNODE(name: string, memory: bigint)
+output relation MEMORYUSEDPERNODE(name: string, memory: signed<64>)
 
-output relation PODSUSEDPERNODE(name:string, pods:bigint)
+output relation PODSUSEDPERNODE(name:string, pods: signed<64>)
 
-output relation SPARECAPACITY(name:string, cpu_remaining:bigint, memory_remaining: bigint, pods_remaining:bigint) 
+output relation SPARECAPACITY(name:string, cpu_remaining: signed<64>, memory_remaining: signed<64>, pods_remaining: signed<64>) 
 
 
 CPUUSEDPERNODE(node_name, cpu) :-

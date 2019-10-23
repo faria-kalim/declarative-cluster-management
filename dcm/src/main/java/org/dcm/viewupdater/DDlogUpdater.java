@@ -6,8 +6,6 @@ import ddlogapi.DDlogException;
 import ddlogapi.DDlogRecord;
 import org.dcm.IRTable;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -21,8 +19,7 @@ public class DDlogUpdater {
     public DDlogUpdater(final Consumer<DDlogCommand<DDlogRecord>> consumer, final Map<String, IRTable> irTables) {
         try {
             API = new DDlogAPI(1, consumer, false);
-            API.recordCommands("replay.dat", false);
-        } catch (final DDlogException | IOException e) {
+        } catch (final DDlogException e) {
             throw new RuntimeException(e);
         }
     }
@@ -60,13 +57,13 @@ public class DDlogUpdater {
                         newRow[1].toString(),
                         newRow[2].toString(),
                         newRow[3].toString(),
-                        new BigInteger(String.valueOf((long) newRow[4])),
-                        new BigInteger(String.valueOf((long) newRow[5])),
-                        new BigInteger(String.valueOf((long) newRow[6])),
-                        new BigInteger(String.valueOf((long) newRow[7])),
+                        (long) newRow[4],
+                        (long) newRow[5],
+                        (long) newRow[6],
+                        (long) newRow[7],
                         newRow[8].toString(),
                         newRow[9].toString(),
-                        new BigInteger(String.valueOf((int) newRow[10]))
+                        (int) newRow[10]
                 );
                 break;
             case "NODE":
@@ -79,14 +76,14 @@ public class DDlogUpdater {
                         (boolean) newRow[6],
                         (boolean) newRow[7],
                         (boolean) newRow[8],
-                        new BigInteger(String.valueOf((long) newRow[9])),
-                        new BigInteger(String.valueOf((long) newRow[10])),
-                        new BigInteger(String.valueOf((long) newRow[11])),
-                        new BigInteger(String.valueOf((long) newRow[12])),
-                        new BigInteger(String.valueOf((long) newRow[13])),
-                        new BigInteger(String.valueOf((long) newRow[14])),
-                        new BigInteger(String.valueOf((long) newRow[15])),
-                        new BigInteger(String.valueOf((long) newRow[16]))
+                        (long) newRow[9],
+                        (long) newRow[10],
+                        (long) newRow[11],
+                        (long) newRow[12],
+                        (long) newRow[13],
+                        (long) newRow[14],
+                        (long) newRow[15],
+                        (long) newRow[16]
                         );
                 break;
             default:
