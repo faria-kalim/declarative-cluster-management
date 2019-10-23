@@ -107,6 +107,7 @@ public abstract class ViewUpdater {
             flush(command);
         }
         recordsFromDDLog.clear();
+        RECORDS_FROM_DB_2.clear();
     }
 
      private void flush(final List<Object> command) {
