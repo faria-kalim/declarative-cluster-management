@@ -3,11 +3,11 @@
 set -ex
 cwd=$(pwd)
 
-export JDK_OS=darwin
-export JAVA_HOME=~/.jenv/versions/12.0
-export DDLOG=~/code/ddlog
-export DPROG=weave_fewer_queries_cap
-export FLATBUFFERS_JAR_PATH=~/code/flatbuffers-1.11.0/target/flatbuffers-java-1.11.0-SNAPSHOT.jar
+JDK_OS=darwin
+JAVA_HOME=~/.jenv/versions/12.0
+DDLOG=~/code/ddlog
+DPROG=weave_fewer_queries_cap
+FLATBUFFERS_JAR_PATH=~/code/flatbuffers-1.11.0/target/flatbuffers-java-1.11.0-SNAPSHOT.jar
 
 cp ${DPROG}.dl ${DDLOG}
 cd ${DDLOG}
