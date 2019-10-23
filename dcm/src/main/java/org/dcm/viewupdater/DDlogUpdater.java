@@ -13,12 +13,14 @@ import java.util.function.Consumer;
 public class DDlogUpdater {
     private final DDlogAPI API;
 
+    private final Consumer<DDlogCommand<DDlogRecord>> consumer;
     private ddlog.weave_fewer_queries_cap.weave_fewer_queries_capUpdateBuilder builder
             = new ddlog.weave_fewer_queries_cap.weave_fewer_queries_capUpdateBuilder();
 
     public DDlogUpdater(final Consumer<DDlogCommand<DDlogRecord>> consumer, final Map<String, IRTable> irTables) {
         try {
-            API = new DDlogAPI(1, consumer, false);
+            API = new DDlogAPI(1, null, false);
+            this.consumer = consumer;
         } catch (final DDlogException e) {
             throw new RuntimeException(e);
         }
@@ -35,7 +37,7 @@ public class DDlogUpdater {
         try {
             API.transactionStart();
             builder.applyUpdates(API);
-            API.transactionCommit();
+            API.transactionCommitDumpChanges(consumer);
             builder = new ddlog.weave_fewer_queries_cap.weave_fewer_queries_capUpdateBuilder();
         } catch (final DDlogException e) {
             throw new RuntimeException(e);

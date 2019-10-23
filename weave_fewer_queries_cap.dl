@@ -1,3 +1,5 @@
+import intern
+
 function sum(g: Group<(signed<64>)>): (signed<64>) =
 {
     var sum: signed<64> = 0;
@@ -8,7 +10,7 @@ function sum(g: Group<(signed<64>)>): (signed<64>) =
 }
 
 input relation NODE(
-	name: string, 
+	name: IString, 
 	is_master: bool, 
 	unschedulable: bool, 
 	out_of_disk: bool, 
@@ -27,26 +29,26 @@ input relation NODE(
 	pods_allocatable: signed<64>) 
 
 input relation POD(
-	pod_name: string, 
-	status: string, 
-	controllable__node_name: string,
-	namespace: string, 
+	pod_name: IString, 
+	status: IString, 
+	controllable__node_name: IString,
+	namespace: IString, 
 	cpu_request: signed<64>,  
 	memory_request: signed<64>, 
 	ephemeral_storage_request: signed<64>,
 	pods_request: signed<64>,
-	owner_name: string,
-	creation_timestamp: string,
+	owner_name: IString,
+	creation_timestamp: IString,
 	priority: signed<64>)
 
 
-output relation CPUUSEDPERNODE(name: string, cpu: signed<64>)
+output relation CPUUSEDPERNODE(name: IString, cpu: signed<64>)
 
-output relation MEMORYUSEDPERNODE(name: string, memory: signed<64>)
+output relation MEMORYUSEDPERNODE(name: IString, memory: signed<64>)
 
-output relation PODSUSEDPERNODE(name:string, pods: signed<64>)
+output relation PODSUSEDPERNODE(name:IString, pods: signed<64>)
 
-output relation SPARECAPACITY(name:string, cpu_remaining: signed<64>, memory_remaining: signed<64>, pods_remaining: signed<64>) 
+output relation SPARECAPACITY(name:IString, cpu_remaining: signed<64>, memory_remaining: signed<64>, pods_remaining: signed<64>) 
 
 
 CPUUSEDPERNODE(node_name, cpu) :-
@@ -63,11 +65,12 @@ PODSUSEDPERNODE(node_name, pods):-
 
 SPARECAPACITY(node_name, cpu_remaining, memory_remaining, pods_remaining) :-
 	POD(.controllable__node_name = node_name),
-	(node_name != "null"),
-	NODE(node_name, _, _, _, _, _, _, _, _, _, _, _, _, cpu_allocatable, memory_allocatable, _, pods_allocatable), 
+	(istring_str(node_name) != "null"),
 	CPUUSEDPERNODE(node_name, cpu),
 	MEMORYUSEDPERNODE(node_name, memory),
 	PODSUSEDPERNODE(node_name, pods),
+	NODE(node_name, _, _, _, _, _, _, _, _, _, _, _, _, cpu_allocatable, memory_allocatable, _, pods_allocatable), 
 	var cpu_remaining =  cpu_allocatable-cpu,
 	var memory_remaining =  memory_allocatable-memory,
 	var pods_remaining = pods_allocatable-pods.
+
