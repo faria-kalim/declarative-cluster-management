@@ -1,13 +1,12 @@
 package org.dcm.viewupdater;
 
+import ddlog.weave_fewer_queries_cap.SPARECAPACITYReader;
+import ddlog.weave_fewer_queries_cap.weave_fewer_queries_capRelation;
 import ddlogapi.DDlogCommand;
-import ddlogapi.DDlogRecord;
 import org.dcm.IRTable;
 import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.Record;
-import org.jooq.Table;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -33,13 +32,8 @@ public abstract class ViewUpdater {
     private final Map<String, Map<String, PreparedStatement>> preparedQueries = new HashMap<>();
     private Map<String, IRTable> irTables;
     private final DDlogUpdater updater;
-    private final Map<String, List<LocalDDlogCommand>> recordsFromDDLog = new HashMap<>();
-
-    private static final String INTEGER_TYPE = "java.lang.Integer";
-    private static final String STRING_TYPE = "java.lang.String";
-    private static final String BOOLEAN_TYPE = "java.lang.Boolean";
-    private static final String LONG_TYPE = "java.lang.Long";
-
+    private final List<List<Object>> recordsFromDDLog = new ArrayList<>();
+    private static final String SPARECAPACITY_NAME = "SPARECAPACITY";
     static final Map<String, List<Object[]>> RECORDS_FROM_DB_2 = new HashMap<>();
 
     /**
@@ -57,32 +51,7 @@ public abstract class ViewUpdater {
         this.irTables = irTables;
         this.baseTables = baseTables;
         this.dbCtx = dbCtx;
-        this.updater = new DDlogUpdater(r -> receiveUpdateFromDDlog(r), irTables);
-    }
-
-    private String generatePreparedQueryString(final String dataType, final String commandKind) {
-        final StringBuilder stringBuilder = new StringBuilder();
-        final IRTable irTable = irTables.get(dataType);
-
-        final Table<? extends Record> table = irTable.getTable();
-        final Field[] fields = table.fields();
-        if (commandKind.equals(String.valueOf(DDlogCommand.Kind.Insert))) {
-            stringBuilder.append("insert into ").append(dataType).append(" values ( \n");
-            stringBuilder.append(" ?,".repeat(Math.max(0, fields.length - 1)));
-            stringBuilder.append(" ?");
-        } else if (commandKind.equals(String.valueOf(DDlogCommand.Kind.DeleteVal))) {
-            stringBuilder.append("delete from ").append(dataType).append(" where ( \n");
-            int counter = 0;
-            for (final Field field : fields) {
-                stringBuilder.append(field.getName()).append(" = ?");
-                if (counter < fields.length - 1) {
-                    stringBuilder.append(" and ");
-                }
-                counter = counter + 1;
-            }
-        }
-        stringBuilder.append("\n)");
-        return stringBuilder.toString();
+        this.updater = new DDlogUpdater(r -> receiveUpdateFromDDlog(r));
     }
 
     void createDBTriggers() {
@@ -101,105 +70,55 @@ public abstract class ViewUpdater {
         }
     }
 
-    private void receiveUpdateFromDDlog(final DDlogCommand command) {
-        final List objects = new ArrayList();
-        final DDlogRecord record = command.value;
-//        System.out.println("Print command: " + command);
-
-        final String tableName = command.value.getStructName();
-        // we only hold records for tables we have in the DB and none others.
-        if (irTables.containsKey(tableName)) {
-            final IRTable irTable = irTables.get(tableName);
-            final Table<? extends Record> table = irTable.getTable();
-
-            int counter = 0;
-            for (final Field<?> field : table.fields()) {
-                final Class<?> cls = field.getType();
-                final DDlogRecord f = record.getStructField(counter);
-                switch (cls.getName()) {
-                    case BOOLEAN_TYPE:
-                        objects.add(f.getBoolean());
-                        break;
-                    case INTEGER_TYPE:
-                        objects.add(f.getU128());
-                        break;
-                    case LONG_TYPE:
-                        objects.add(f.getLong());
-                        break;
-                    case STRING_TYPE:
-                        objects.add(f.getString());
-                        break;
-                    default:
-                        throw new RuntimeException("Unexpected datatype: " + cls.getName());
-                }
-                counter = counter + 1;
+    private void receiveUpdateFromDDlog(final DDlogCommand<Object> command) {
+        final int relid = command.relid();
+        switch (relid) {
+            case weave_fewer_queries_capRelation.SPARECAPACITY: {
+                final SPARECAPACITYReader reader = (SPARECAPACITYReader) command.value();
+                final List<Object> temp = new ArrayList<>();
+                temp.add(reader.name());
+                temp.add(reader.cpu_remaining());
+                temp.add(reader.memory_remaining());
+                temp.add(reader.pods_remaining());
+                recordsFromDDLog.add(temp);
+                break;
             }
-            recordsFromDDLog.computeIfAbsent(command.value.getStructName(), k -> new ArrayList<LocalDDlogCommand>());
-            recordsFromDDLog.get(tableName).add(new LocalDDlogCommand(command.kind.toString(), tableName, objects));
+            default:
+                break;
         }
     }
 
     public void flushUpdates() {
         updater.sendUpdatesToDDlog(RECORDS_FROM_DB_2);
-
-        for (final Map.Entry<String, List<LocalDDlogCommand>> entry: recordsFromDDLog.entrySet()) {
-            final String tableName = entry.getKey();
-            final List<LocalDDlogCommand> commands = entry.getValue();
-                for (final LocalDDlogCommand command : commands) {
-                    // check if query is already created and if not, create it
-                    if (!preparedQueries.containsKey(tableName) ||
-                            (preparedQueries.containsKey(tableName) &&
-                                    !preparedQueries.get(tableName).containsKey(command.command))) {
-                        updatePreparedQueries(tableName, command);
-                    }
-                    flush(tableName, command);
+        for (final List<Object> command : recordsFromDDLog) {
+            // check if query is already created and if not, create it
+            if (!preparedQueries.containsKey(SPARECAPACITY_NAME) ||
+                    (preparedQueries.containsKey(SPARECAPACITY_NAME) &&
+                            !preparedQueries.get(SPARECAPACITY_NAME).containsKey("MERGE"))) {
+                preparedQueries.computeIfAbsent(SPARECAPACITY_NAME, k -> new HashMap<>());
+                try {
+                    preparedQueries.get(SPARECAPACITY_NAME).put("MERGE",
+                            connection.prepareStatement(
+                            "MERGE INTO SPARECAPACITY KEY(name) VALUES (?, ?, ?, ?)"));
+                } catch (final SQLException e) {
+                    throw new RuntimeException(e);
                 }
+            }
+            flush(command);
         }
         recordsFromDDLog.clear();
     }
 
-     private void flush(final String tableName, final LocalDDlogCommand command) {
+     private void flush(final List<Object> command) {
         try {
-            final PreparedStatement query = preparedQueries.get(tableName).get(command.command);
-
-            final IRTable irTable = irTables.get(tableName);
-            final Table<? extends Record> table = irTable.getTable();
-            final Field[] fields = table.fields();
-            for (int i = 0; i < fields.length; i++) {
-                final Class fieldClass = fields[i].getType();
-                final Object item = command.values.get(i);
-                final int index = i + 1;
-                switch (fieldClass.getName()) {
-                    case LONG_TYPE:
-                        query.setLong(index, (Long) item);
-                        break;
-                    case INTEGER_TYPE:
-                        query.setInt(index, (Integer) item);
-                        break;
-                    case BOOLEAN_TYPE:
-                        query.setBoolean(index, (Boolean) item);
-                        break;
-                    default:
-                        query.setString(index, (String) item);
-                }
-            }
+            final PreparedStatement query = preparedQueries.get(SPARECAPACITY_NAME).get("MERGE");
+            query.setString(1, (String) command.get(0));
+            query.setInt(2,  ((BigInteger) command.get(1)).intValue());
+            query.setInt(3,  ((BigInteger) command.get(2)).intValue());
+            query.setInt(4,  ((BigInteger) command.get(3)).intValue());
             query.executeUpdate();
         } catch (final SQLException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-     private void updatePreparedQueries(final String tableName, final LocalDDlogCommand command) {
-        final String commandKind = command.command;
-        preparedQueries.computeIfAbsent(tableName, t -> new HashMap<>());
-        if (!preparedQueries.get(tableName).containsKey(commandKind)) {
-            // make prepared statement here
-            final String preparedQuery = generatePreparedQueryString(tableName, String.valueOf(command.command));
-            try {
-                preparedQueries.get(tableName).put(commandKind, connection.prepareStatement(preparedQuery));
-            } catch (final SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
