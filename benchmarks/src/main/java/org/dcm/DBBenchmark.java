@@ -654,6 +654,7 @@ public class DBBenchmark {
     private void init() {
         index = 0;
         baseTables = new ArrayList<>();
+        views = new ArrayList<>();
 
         baseTables.add("POD");
         baseTables.add("NODE");
@@ -895,7 +896,7 @@ public class DBBenchmark {
     }
 
     private void printSQLResult(final String viewName) {
-        Result<? extends Record> results =
+        final Result<? extends Record> results =
                 dbCtx.resultQuery("select * from " + viewName).fetch();
         System.out.println(String.format("%s: rows: %d", viewName, results.size()));
     }
