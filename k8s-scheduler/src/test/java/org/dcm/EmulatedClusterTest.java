@@ -184,7 +184,7 @@ class EmulatedClusterTest {
         final int deploymentAffinity = Integer.parseInt(cmd.hasOption("deploymentAffinity") ?
                 cmd.getOptionValue("deploymentAffinity") : "1");
         LOG.info("Running experiment with parameters: numNodes: {}, traceFile: {}, cpuScaleDown: {}, " +
-                        "memScaleDown: {}, timeScaleDown: {}, startTimeCutOff: {}, proportion: {}, deploymentAffinity: {}",
+                  "memScaleDown: {}, timeScaleDown: {}, startTimeCutOff: {}, proportion: {}, deploymentAffinity: {}",
                 numNodes, traceFile, cpuScaleDown, memScaleDown, timeScaleDown,
                 startTimeCutOff, affinityRequirementsProportion, deploymentAffinity);
         emulatedClusterTest.runTraceLocally(numNodes, traceFile, cpuScaleDown, memScaleDown, timeScaleDown,
